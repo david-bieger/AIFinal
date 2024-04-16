@@ -1,6 +1,5 @@
 #synthetic data set for turns
 import random 
-import heapq
 from itertools import permutations
 
 def get_stop_combinations(stops):
@@ -117,14 +116,8 @@ def A_star(start, end, grid_size, right, left):
 
 
 
-def get_optimal_route():
-    grid_size = 9
-    num_stops = 5
-    stops = []
-    right = 1 #weight of a right turn
-    left = 3 #weight of a left turn
-    stops = get_stops(stops, grid_size, num_stops)
-    print("stops: " + str(stops))
+def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, straight = 1):
+    
     routes = get_stop_combinations(stops)
     route_number = 0
     route_cost = []
@@ -139,7 +132,20 @@ def get_optimal_route():
         route_cost.append(path_cost)
         route_number += 1
     optimal_route_index = route_cost.index(min(route_cost))
-    return routes[optimal_route_index]
+    return (routes[optimal_route_index], route_cost[optimal_route_index])
     
 
-print(get_optimal_route())
+def main():
+    stops = []
+    stops = get_stops(stops, 9, 5)
+    print("stops: " + str(stops))
+
+    cost_of_unweighted = get_optimal_route(stops, 9, 5, 10, 10, 10)[1]
+    cost_of_weighted = get_optimal_route(stops, 9, 5, 18, 5, 7)[1]
+
+    print("cost of unweighted: " + str(cost_of_unweighted))
+    print("cost of weighted: " + str(cost_of_weighted))
+    print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(cost_of_weighted)/float(cost_of_unweighted)))) + "% of the time of counting them the same.")
+
+
+main()
