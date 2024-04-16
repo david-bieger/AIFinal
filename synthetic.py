@@ -136,16 +136,29 @@ def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, 
     
 
 def main():
+    #variables that can change based on desired parameters
+    
+    #unweighted_cost * 3 should = right+left+straight for accurate results
+    unweighted_cost = 10
+    right_weight = 5
+    straight_weight = 7
+    left_weight = 18
+
+    grid_size = 9
+    num_stops = 5
+
     stops = []
-    stops = get_stops(stops, 9, 5)
-    print("stops: " + str(stops))
+    stops = get_stops(stops, grid_size, num_stops)
+    print("\nstops: " + str(stops))
 
-    cost_of_unweighted = get_optimal_route(stops, 9, 5, 10, 10, 10)[1]
-    cost_of_weighted = get_optimal_route(stops, 9, 5, 18, 5, 7)[1]
+    unweighted_route, cost_of_unweighted = get_optimal_route(stops, grid_size, num_stops, unweighted_cost, unweighted_cost, unweighted_cost)
+    weighted_route, cost_of_weighted = get_optimal_route(stops, grid_size, num_stops, left_weight, right_weight, straight_weight)
 
-    print("cost of unweighted: " + str(cost_of_unweighted))
+    print("path of unweighted: " + str(unweighted_route))
+    print("cost of unweighted: " + str(cost_of_unweighted) + "\n")
     print("cost of weighted: " + str(cost_of_weighted))
-    print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(cost_of_weighted)/float(cost_of_unweighted)))) + "% of the time of counting them the same.")
+    print("path of weighted: " + str(weighted_route) + "\n")
+    print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(cost_of_weighted)/float(cost_of_unweighted)))) + "% of the time of counting them the same.\n")
 
 
 main()
