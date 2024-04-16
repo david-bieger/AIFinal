@@ -149,16 +149,30 @@ def main():
 
     stops = []
     stops = get_stops(stops, grid_size, num_stops)
-    print("\nstops: " + str(stops))
+    #print("\nstops: " + str(stops) + "\n")
 
     unweighted_route, cost_of_unweighted = get_optimal_route(stops, grid_size, num_stops, unweighted_cost, unweighted_cost, unweighted_cost)
     weighted_route, cost_of_weighted = get_optimal_route(stops, grid_size, num_stops, left_weight, right_weight, straight_weight)
 
-    print("path of unweighted: " + str(unweighted_route))
-    print("cost of unweighted: " + str(cost_of_unweighted) + "\n")
-    print("cost of weighted: " + str(cost_of_weighted))
-    print("path of weighted: " + str(weighted_route) + "\n")
-    print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(cost_of_weighted)/float(cost_of_unweighted)))) + "% of the time of counting them the same.\n")
+    # print("path of unweighted: " + str(unweighted_route))
+    # print("cost of unweighted: " + str(cost_of_unweighted) + "\n")
+    # print("cost of weighted: " + str(cost_of_weighted))
+    # print("path of weighted: " + str(weighted_route) + "\n")
+    # print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(cost_of_weighted)/float(cost_of_unweighted)))) + "% of the time of counting them the same.\n")
+    return (cost_of_unweighted, cost_of_weighted)
 
 
-main()
+def loop_for_average(times = 10):
+    unweighted_total, weighted_total = 0, 0
+    for i in range(times):
+        retVal = main()
+        unweighted_total += retVal[0]
+        weighted_total += retVal[1]
+    weighted_avg = weighted_total / times
+    unweighted_avg = unweighted_total / times
+    print("unweighted average cost for " + str(times) + " times: " + str(unweighted_avg) + "\n")
+    print("weighted average cost for " + str(times) + " times: " + str(weighted_avg) + "\n")
+    print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(weighted_avg)/float(unweighted_avg)))) + "% of the time of counting them the same.\n")
+    
+
+loop_for_average(20)
