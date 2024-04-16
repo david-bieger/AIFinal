@@ -33,7 +33,7 @@ def actions(pos, grid_size=15, right=1, left=3):
     x, y = pos[0], pos[1]
     direction = "N"
     if len(pos) >= 3: direction = pos[2]
-    print("pos: " + str(pos))
+    #print("pos: " + str(pos))
 
     # List to store possible actions
     possible_actions = []
@@ -92,6 +92,7 @@ def A_star(start, end, grid_size, right, left):
     while len(q) > 0:
         cur_pos = q.pop(0)[1]  # Pop the item with the lowest priority
         if goal_test(cur_pos, end):
+            end = (end[0], end[1], cur_pos[2])
             break
         for action in actions(cur_pos, grid_size, right, left):
             next_pos, weight = action
@@ -101,7 +102,12 @@ def A_star(start, end, grid_size, right, left):
             if next_pos[0:2] == end[0:2]:
                 next_pos = (next_pos[0], next_pos[1], prev_direction)
 
-            if next_pos not in cost or new_cost < cost[next_pos]:
+            if next_pos not in cost:
+                cost[next_pos] = new_cost
+                priority = new_cost + h(next_pos, end)
+                q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
+                if len(cur_pos) >= 3: prev_direction = cur_pos[2]  # Update previous direction
+            if new_cost < cost[next_pos]:
                 cost[next_pos] = new_cost
                 priority = new_cost + h(next_pos, end)
                 q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
@@ -112,8 +118,8 @@ def A_star(start, end, grid_size, right, left):
 
 
 def get_optimal_route():
-    grid_size = 15
-    num_stops = 10
+    grid_size = 9
+    num_stops = 5
     stops = []
     right = 1 #weight of a right turn
     left = 3 #weight of a left turn
@@ -126,7 +132,9 @@ def get_optimal_route():
         path_cost = 0
         for i in range(len(route) - 1):
             stop = route[i]
+            #print("stop" + str(stop))
             next_stop = route[i + 1]
+            #print("next stop: " + str(next_stop))
             path_cost += A_star(stop, next_stop, grid_size, right, left)
         route_cost.append(path_cost)
         route_number += 1
@@ -134,4 +142,4 @@ def get_optimal_route():
     return routes[optimal_route_index]
     
 
-get_optimal_route()
+print(get_optimal_route())
