@@ -2,6 +2,8 @@
 import random 
 from itertools import permutations
 
+#NOTE: If you want to change parameters, change them in get_cost function
+
 def get_stop_combinations(stops):
     # Generate all permutations of the stops
     stop_permutations = permutations(stops)
@@ -135,7 +137,7 @@ def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, 
     return (routes[optimal_route_index], route_cost[optimal_route_index])
     
 
-def main():
+def get_costs():
     #variables that can change based on desired parameters
     
     #unweighted_cost * 3 should = right+left+straight for accurate results
@@ -165,7 +167,7 @@ def main():
 def loop_for_average(times = 10):
     unweighted_total, weighted_total = 0, 0
     for i in range(times):
-        retVal = main()
+        retVal = get_costs()
         unweighted_total += retVal[0]
         weighted_total += retVal[1]
     weighted_avg = weighted_total / times
