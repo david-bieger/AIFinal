@@ -172,9 +172,12 @@ def loop_for_average(times = 10):
         weighted_total += retVal[1]
     weighted_avg = weighted_total / times
     unweighted_avg = unweighted_total / times
+
+    magic_percent = 0.01 * float(int(10000*float(weighted_avg)/float(unweighted_avg))) #messed with ints and floats to round it to 2 decimal places
+
     print("unweighted average cost for " + str(times) + " times: " + str(unweighted_avg) + "\n")
     print("weighted average cost for " + str(times) + " times: " + str(weighted_avg) + "\n")
-    print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(weighted_avg)/float(unweighted_avg)))) + "% of the time of counting them the same.\n")
+    print("Prioritizing right turns took " + str(magic_percent) + "% of the time of counting them the same.\n")
     
 
 loop_for_average(20)
