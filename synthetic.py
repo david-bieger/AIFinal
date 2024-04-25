@@ -1,6 +1,7 @@
 #synthetic data set for turns
 import random 
 from itertools import permutations
+from visualizeRoute import visualize_route
 
 #NOTE: If you want to change parameters, change them in get_cost function
 
@@ -42,7 +43,7 @@ def actions(pos, grid_size=15, right=1, left=3):
     # Handling actions for direction North (N)
     if direction == "N":
         if y > 0:  # Boundary check for moving North
-            possible_actions.append(((x, y - 1, "N"), straight))
+            possible_actions.append(((x, y + 1, "N"), straight))
         if x < grid_size - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), right))
         if x > 0:  # Boundary check for moving West
@@ -69,7 +70,7 @@ def actions(pos, grid_size=15, right=1, left=3):
     # Handling actions for direction South (S)
     elif direction == "S":
         if y < grid_size - 1:  # Boundary check for moving South
-            possible_actions.append(((x, y + 1, "S"), straight))
+            possible_actions.append(((x, y - 1, "S"), straight))
         if x > 0:  # Boundary check for moving West
             possible_actions.append(((x - 1, y, "W"), right))
         if x < grid_size - 1:  # Boundary check for moving East
@@ -87,9 +88,13 @@ def A_star(start, end, grid_size, right, left):
     q = []
     q = add_to_priority_queue(q, 0, start)  # Initialize the priority queue
     cost = {}
+    parent = {start: None}
+    
     cost[start] = 0
-    if len(start) >= 3: prev_direction = start[2]  # Track previous direction
-    else: prev_direction = "N" #hard code a start facing north
+    if len(start) >= 3: 
+        prev_direction = start[2]  # Track previous direction
+    else: 
+        prev_direction = "N" #hard code a start facing north
     while len(q) > 0:
         cur_pos = q.pop(0)[1]  # Pop the item with the lowest priority
         if goal_test(cur_pos, end):
@@ -105,36 +110,51 @@ def A_star(start, end, grid_size, right, left):
 
             if next_pos not in cost:
                 cost[next_pos] = new_cost
+                parent[next_pos] = cur_pos
                 priority = new_cost + h(next_pos, end)
                 q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
-                if len(cur_pos) >= 3: prev_direction = cur_pos[2]  # Update previous direction
+                prev_direction = next_pos[2] if len(next_pos) >= 3 else prev_direction  # Update direction
+            
             if new_cost < cost[next_pos]:
                 cost[next_pos] = new_cost
                 priority = new_cost + h(next_pos, end)
                 q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
-                if len(cur_pos) >= 3: prev_direction = cur_pos[2]  # Update previous direction
+                prev_direction = next_pos[2] if len(next_pos) >= 3 else prev_direction  # Update direction
+    path = []
+    step = end
+    while step is not None:
+        path.append(step)
+        step = parent[step]
+    path.reverse()
 
-    return cost[end]
+    return cost[end], path
 
 
 
 def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, straight = 1):
     
     routes = get_stop_combinations(stops)
+    path_taken_for_routes = []
     route_number = 0
     route_cost = []
+    
     for route in routes:
         path_cost = 0
+        full_path = []
         for i in range(len(route) - 1):
             stop = route[i]
             #print("stop" + str(stop))
             next_stop = route[i + 1]
             #print("next stop: " + str(next_stop))
-            path_cost += A_star(stop, next_stop, grid_size, right, left)
+            cost, path = A_star(stop, next_stop, grid_size, right, left)
+            path_cost += cost
+            full_path.extend(path[:-1])
+        full_path.append(route[-1])
+        path_taken_for_routes.append(full_path)
         route_cost.append(path_cost)
         route_number += 1
     optimal_route_index = route_cost.index(min(route_cost))
-    return (routes[optimal_route_index], route_cost[optimal_route_index])
+    return (routes[optimal_route_index], route_cost[optimal_route_index], path_taken_for_routes[optimal_route_index])
     
 
 def get_costs():
@@ -153,31 +173,46 @@ def get_costs():
     stops = get_stops(stops, grid_size, num_stops)
     #print("\nstops: " + str(stops) + "\n")
 
-    unweighted_route, cost_of_unweighted = get_optimal_route(stops, grid_size, num_stops, unweighted_cost, unweighted_cost, unweighted_cost)
-    weighted_route, cost_of_weighted = get_optimal_route(stops, grid_size, num_stops, left_weight, right_weight, straight_weight)
+    unweighted_route, cost_of_unweighted, path_taken_for_optimal_unweighted_route = get_optimal_route(stops, grid_size, num_stops, unweighted_cost, unweighted_cost, unweighted_cost)
+    weighted_route, cost_of_weighted, path_taken_for_optimal_weighted_route = get_optimal_route(stops, grid_size, num_stops, left_weight, right_weight, straight_weight)
 
+    # print("stops:", weighted_route)
+    # print( "path taken to stops:", path_taken_for_optimal_weighted_route)
     # print("path of unweighted: " + str(unweighted_route))
     # print("cost of unweighted: " + str(cost_of_unweighted) + "\n")
     # print("cost of weighted: " + str(cost_of_weighted))
     # print("path of weighted: " + str(weighted_route) + "\n")
     # print("Prioritizing right turns took " + str(0.01 * float(int(10000*float(cost_of_weighted)/float(cost_of_unweighted)))) + "% of the time of counting them the same.\n")
-    return (cost_of_unweighted, cost_of_weighted)
+    return (cost_of_unweighted, path_taken_for_optimal_unweighted_route, cost_of_weighted, path_taken_for_optimal_weighted_route, weighted_route)
 
 
 def loop_for_average(times = 10):
     unweighted_total, weighted_total = 0, 0
+    min_weighted_cost = float('inf')
+    best_weighted_path = None
+    route_with_least_cost = []
     for i in range(times):
-        retVal = get_costs()
-        unweighted_total += retVal[0]
-        weighted_total += retVal[1]
+        cost_of_unweighted, unweighted_path, cost_of_weighted, weighted_path, weighted_route = get_costs()
+        unweighted_total += cost_of_unweighted
+        weighted_total += cost_of_weighted
+    
+    
+        if cost_of_weighted < min_weighted_cost:
+            min_weighted_cost = cost_of_weighted
+            best_weighted_path = weighted_path
+            route_with_least_cost = weighted_route
+
     weighted_avg = weighted_total / times
     unweighted_avg = unweighted_total / times
 
     magic_percent = 0.01 * float(int(10000*float(weighted_avg)/float(unweighted_avg))) #messed with ints and floats to round it to 2 decimal places
-
+    
     print("\nunweighted average cost for " + str(times) + " times: " + str(unweighted_avg) + "\n")
     print("weighted average cost for " + str(times) + " times: " + str(weighted_avg) + "\n")
     print("Prioritizing right turns took " + str(magic_percent) + "% of weighing right and left turns equally.\n")
-    
+    return (best_weighted_path, route_with_least_cost)
 
-loop_for_average(20)
+weighted_path, route = loop_for_average(20)
+# print(weighted_path)
+visualize_route(weighted_path)
+
