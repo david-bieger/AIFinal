@@ -331,3 +331,7 @@ def h(cur_pos, next_stop, traffic):
     if isTraffic(cur_pos, traffic) != None:
         traffic_cost = (-isTraffic(cur_pos, traffic)+grid_size)
     return dx + dy + traffic_cost
+
+
+weighted_path, route = loop_for_average(20)
+print(weighted_path)
