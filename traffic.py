@@ -91,7 +91,7 @@ def A_star(start, end, grid_size, right, left):
     q = add_to_priority_queue(q, 0, start)  # Initialize the priority queue
     cost = {}
     parent = {start: None}
-    
+    steps = {start: 0}
     cost[start] = 0
     if len(start) >= 3: 
         prev_direction = start[2]  # Track previous direction
@@ -113,6 +113,7 @@ def A_star(start, end, grid_size, right, left):
             if next_pos not in cost:
                 cost[next_pos] = new_cost
                 parent[next_pos] = cur_pos
+                steps[next_pos] = steps[cur_pos]+1
                 priority = new_cost + h(next_pos, end)
                 q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
                 prev_direction = next_pos[2] if len(next_pos) >= 3 else prev_direction  # Update direction
