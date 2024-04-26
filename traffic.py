@@ -85,7 +85,7 @@ def add_to_priority_queue(q, priority, pos):
     q.sort()
     return q
 
-def A_star(start, end, grid_size, right, left):
+def A_star(start, end, grid_size, right, left, traffic):
     q = []
     q = add_to_priority_queue(q, 0, start)  # Initialize the priority queue
     cost = {}
@@ -98,6 +98,7 @@ def A_star(start, end, grid_size, right, left):
         prev_direction = "N" #hard code a start facing north
     while len(q) > 0:
         cur_pos = q.pop(0)[1]  # Pop the item with the lowest priority
+        temp_traffic = incrementTraffic[traffic, grid_size, grid_size, steps[cur_pos]]
         if goal_test(cur_pos, end):
             end = (end[0], end[1], cur_pos[2])
             break
@@ -113,13 +114,13 @@ def A_star(start, end, grid_size, right, left):
                 cost[next_pos] = new_cost
                 parent[next_pos] = cur_pos
                 steps[next_pos] = steps[cur_pos]+1
-                priority = new_cost + h(next_pos, end)
+                priority = new_cost + h(next_pos, end, temp_traffic)
                 q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
                 prev_direction = next_pos[2] if len(next_pos) >= 3 else prev_direction  # Update direction
             
             if new_cost < cost[next_pos]:
                 cost[next_pos] = new_cost
-                priority = new_cost + h(next_pos, end)
+                priority = new_cost + h(next_pos, end, temp_traffic)
                 q = add_to_priority_queue(q, priority, next_pos)  # Push tuple to priority queue
                 prev_direction = next_pos[2] if len(next_pos) >= 3 else prev_direction  # Update direction
     path = []
@@ -139,7 +140,7 @@ def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, 
     path_taken_for_routes = []
     route_number = 0
     route_cost = []
-    
+    traffic = create_secondary_agents(9, 9)
     for route in routes:
         path_cost = 0
         full_path = []
@@ -148,9 +149,10 @@ def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, 
             #print("stop" + str(stop))
             next_stop = route[i + 1]
             #print("next stop: " + str(next_stop))
-            cost, path = A_star(stop, next_stop, grid_size, right, left)
+            cost, path = A_star(stop, next_stop, grid_size, right, left, traffic)
             path_cost += cost
             full_path.extend(path[:-1])
+            traffic = incrementTraffic(traffic, grid_size, grid_size, len(path))
         full_path.append(route[-1])
         path_taken_for_routes.append(full_path)
         route_cost.append(path_cost)
@@ -189,7 +191,6 @@ def get_costs():
 
 
 def loop_for_average(times = 10):
-    agents = create_secondary_agents(9, 9)
     unweighted_total, weighted_total = 0, 0
     min_weighted_cost = float('inf')
     best_weighted_path = None
@@ -298,7 +299,7 @@ def incrementTraffic(current_state, grid_x, grid_y, num_steps):
                     if new_position == 0:
                         agent[2] = "E"
 
-def isTraffic(pos, agents):
+def isTraffic(pos, traffic):
     # Check our direction
     if pos[2] == "N":
         #Check bus on our street
@@ -322,13 +323,13 @@ def isTraffic(pos, agents):
     return None
 
 grid_size = 9
-def h(cur_pos, next_stop):
+def h(cur_pos, next_stop, traffic):
     #manhattan distance here
     traffic_cost = 0
     dx = abs(cur_pos[0] - next_stop[0])
     dy = abs(cur_pos[1] - next_stop[1])
-    if isTraffic(cur_pos) != None:
-        traffic_cost = (-isTraffic()+grid_size)
+    if isTraffic(cur_pos, traffic) != None:
+        traffic_cost = (-isTraffic(cur_pos, traffic)+grid_size)
     return dx + dy + traffic_cost
 
 
