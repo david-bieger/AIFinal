@@ -31,7 +31,7 @@ def get_stops(stops, grid_size, num_stops):
 def goal_test(cur_pos, next_stop):
     return cur_pos[0] == next_stop[0] and cur_pos[1] == next_stop[1]
 
-def actions(pos, grid_size=15, right=1, left=3):
+def actions(pos, grid_size=9, right=1, left=3):
     # returns ((new x, new y, new direction), weight)
     straight = 1
     x, y = pos[0], pos[1]
@@ -44,7 +44,7 @@ def actions(pos, grid_size=15, right=1, left=3):
 
     # Handling actions for direction North (N)
     if direction == "N":
-        if y > 0:  # Boundary check for moving North
+        if y < grid_size - 1:  # Boundary check for moving North
             possible_actions.append(((x, y + 1, "N"), straight))
         if x < grid_size - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), right))
@@ -99,7 +99,7 @@ def A_star(start, end, grid_size, right, left, traffic):
         prev_direction = "N" #hard code a start facing north
     while len(q) > 0:
         cur_pos = q.pop(0)[1]  # Pop the item with the lowest priority
-        temp_traffic = incrementTraffic[traffic, grid_size, grid_size, steps[cur_pos]]
+        temp_traffic = incrementTraffic(traffic, grid_size, grid_size, steps[cur_pos])
         if goal_test(cur_pos, end):
             end = (end[0], end[1], cur_pos[2])
             break
@@ -303,21 +303,21 @@ def isTraffic(pos, traffic):
     # Check our direction
     if pos[2] == "N":
         #Check bus on our street
-        bus = agents[pos[0]]
+        bus = traffic[pos[0]]
         # If bus is going same direction and is in front of us, take manhattan distance.
         if bus[2] == "N" and bus[1] >= pos[1]:
             # Negative manhattan distance for deincentivization
             return bus[1] - pos[1]
     elif pos[2] == "S":
-        bus = agents[pos[0]]
+        bus = traffic[pos[0]]
         if bus[2] == "S" and bus[1] <= pos[1]:
             return pos[1] - bus[1]
     elif pos[2] == "E":
-        bus = agents[pos[1] + grid_size]
+        bus = traffic[pos[1] + grid_size]
         if bus[2] == "E" and bus[0] >= pos[0]:
             return bus[0] - pos[0]
     elif pos[2] == "W":
-        bus = agents[pos[1]+grid_size]
+        bus = traffic[pos[1]+grid_size]
         if bus[2] == "W" and bus[0] <= pos[0]:
             return pos[0] - bus[0]
     return None

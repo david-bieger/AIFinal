@@ -42,7 +42,7 @@ def actions(pos, grid_size=15, right=1, left=3):
 
     # Handling actions for direction North (N)
     if direction == "N":
-        if y > 0:  # Boundary check for moving North
+        if y < grid_size - 1:  # Boundary check for moving North
             possible_actions.append(((x, y + 1, "N"), straight))
         if x < grid_size - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), right))
@@ -212,7 +212,7 @@ def loop_for_average(times = 10):
     print("Prioritizing right turns took " + str(magic_percent) + "% of weighing right and left turns equally.\n")
     return (best_weighted_path, route_with_least_cost)
 
-weighted_path, route = loop_for_average(20)
+# weighted_path, route = loop_for_average(20)
 # # print(weighted_path)
 # visualize_route(weighted_path)
 
