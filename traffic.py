@@ -3,6 +3,7 @@
 # being directly behind an agent on the same street.
 
 import random
+import synthetic
 
 # format of each secondary agent in the list [x_position, y_position, direction]
 #synthetic data set for turns
@@ -272,8 +273,6 @@ def check_at_edge(agent, grid_x, grid_y):
 def incrementTraffic(current_state, grid_x, grid_y, num_steps):
 
     for agent in current_state:
-        # agent[2] = check_direction_change(agent, grid_x, grid_y)
-
         for i in range(num_steps):
             if (agent[2] == "N") | (agent[2] == "S"):
                 if agent[2] == "N":
@@ -298,6 +297,8 @@ def incrementTraffic(current_state, grid_x, grid_y, num_steps):
                     agent[0] = new_position
                     if new_position == 0:
                         agent[2] = "E"
+    
+    return current_state
 
 def isTraffic(pos, traffic):
     # Check our direction
@@ -331,11 +332,3 @@ def h(cur_pos, next_stop, traffic):
     if isTraffic(cur_pos, traffic) != None:
         traffic_cost = (-isTraffic(cur_pos, traffic)+grid_size)
     return dx + dy + traffic_cost
-
-
-# agents = create_secondary_agents(5, 5)
-# print(agents)
-# incrementTraffic(agents, 5, 5)
-# print(agents)
-# incrementTraffic(agents, 5, 5)
-# print(agents)
