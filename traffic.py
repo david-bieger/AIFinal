@@ -268,34 +268,35 @@ def check_at_edge(agent, grid_x, grid_y):
     return direction
     
 
-def incrementTraffic(current_state, grid_x, grid_y):
+def incrementTraffic(current_state, grid_x, grid_y, num_steps):
 
     for agent in current_state:
         # agent[2] = check_direction_change(agent, grid_x, grid_y)
 
-        if (agent[2] == "N") | (agent[2] == "S"):
-            if agent[2] == "N":
-                new_position = agent[1] + 1
-                agent[1] = new_position
-                if new_position == grid_y-1:
-                    agent[2] = "S"
+        for i in range(num_steps):
+            if (agent[2] == "N") | (agent[2] == "S"):
+                if agent[2] == "N":
+                    new_position = agent[1] + 1
+                    agent[1] = new_position
+                    if new_position == grid_y-1:
+                        agent[2] = "S"
+                else:
+                    new_position = agent[1] - 1
+                    agent[1] = new_position
+                    if new_position == 0:
+                        agent[2] = "N"
             else:
-                new_position = agent[1] - 1
-                agent[1] = new_position
-                if new_position == 0:
-                    agent[2] = "N"
-        else:
-            if agent[2] == "E":
-                new_position = agent[0] + 1
-                agent[0] = new_position
-                if new_position == grid_x-1:
-                    agent[2] = "W"
-                
-            else:
-                new_position = agent[0] - 1
-                agent[0] = new_position
-                if new_position == 0:
-                    agent[2] = "E"
+                if agent[2] == "E":
+                    new_position = agent[0] + 1
+                    agent[0] = new_position
+                    if new_position == grid_x-1:
+                        agent[2] = "W"
+                    
+                else:
+                    new_position = agent[0] - 1
+                    agent[0] = new_position
+                    if new_position == 0:
+                        agent[2] = "E"
 
 def isTraffic(pos, agents):
     # Check our direction
