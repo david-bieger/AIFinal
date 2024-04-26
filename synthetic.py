@@ -213,6 +213,6 @@ def loop_for_average(times = 10):
     return (best_weighted_path, route_with_least_cost)
 
 weighted_path, route = loop_for_average(20)
-# print(weighted_path)
-visualize_route(weighted_path)
+# # print(weighted_path)
+# visualize_route(weighted_path)
 

@@ -270,7 +270,6 @@ def check_at_edge(agent, grid_x, grid_y):
     
 
 def incrementTraffic(current_state, grid_x, grid_y, num_steps):
-
     for agent in current_state:
         for i in range(num_steps):
             if (agent[2] == "N") | (agent[2] == "S"):
