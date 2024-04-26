@@ -44,7 +44,7 @@ def actions(pos, grid_size=9, right=1, left=3):
 
     # Handling actions for direction North (N)
     if direction == "N":
-        if y > 0:  # Boundary check for moving North
+        if y < grid_size - 1:  # Boundary check for moving North
             possible_actions.append(((x, y + 1, "N"), straight))
         if x < grid_size - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), right))
@@ -99,8 +99,7 @@ def A_star(start, end, grid_size, right, left, traffic):
         prev_direction = "N" #hard code a start facing north
     while len(q) > 0:
         cur_pos = q.pop(0)[1]  # Pop the item with the lowest priority
-        print(cur_pos)
-        temp_traffic = incrementTraffic(traffic, grid_size, grid_size, steps[cur_pos])
+        temp_traffic = incrementTraffic[traffic, grid_size, grid_size, steps[cur_pos]]
         if goal_test(cur_pos, end):
             end = (end[0], end[1], cur_pos[2])
             break
@@ -272,7 +271,6 @@ def check_at_edge(agent, grid_x, grid_y):
     
 
 def incrementTraffic(current_state, grid_x, grid_y, num_steps):
-
     for agent in current_state:
         for i in range(num_steps):
             if (agent[2] == "N") | (agent[2] == "S"):
@@ -333,5 +331,3 @@ def h(cur_pos, next_stop, traffic):
     if isTraffic(cur_pos, traffic) != None:
         traffic_cost = (-isTraffic(cur_pos, traffic)+grid_size)
     return dx + dy + traffic_cost
-
-weighted_path, route = loop_for_average(20)
