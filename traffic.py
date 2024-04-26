@@ -3,7 +3,6 @@
 # being directly behind an agent on the same street.
 
 import random
-import synthetic
 
 # format of each secondary agent in the list [x_position, y_position, direction]
 #synthetic data set for turns
