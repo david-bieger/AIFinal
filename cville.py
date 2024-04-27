@@ -14,5 +14,5 @@ intersections = {
     ("Main", "14th", "E"):[("Main", "Rugby", "E", weight), ("Rugby", "Main", "N", weight)],
     ("Main", "Rugby", "E"):[("Main", "Emmet", "E", weight), ("Emmet", "Main", "S", weight), ("Emmet", "Main", "N", weight)]
     
-    }
+}
 
