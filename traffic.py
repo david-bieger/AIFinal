@@ -3,7 +3,6 @@
 # being directly behind an agent on the same street.
 
 import random
-import synthetic
 
 # format of each secondary agent in the list [x_position, y_position, direction]
 #synthetic data set for turns
@@ -19,11 +18,11 @@ def get_stop_combinations(stops):
     # Convert permutations to lists and return as a list of lists
     return [list(permutation) for permutation in stop_permutations]
 
-def get_stops(stops, grid_size, num_stops):
+def get_stops(stops, x_grid, y_grid, num_stops):
     new_stop = (0, 0)
     for i in range(num_stops):
         while new_stop in stops or (new_stop[0] == 0 and new_stop[1] == 0):
-            new_stop = (random.randint(1, grid_size - 1), random.randint(1, grid_size - 1))
+            new_stop = (random.randint(1, x_grid - 1), random.randint(1, y_grid - 1))
         stops.append(new_stop)        
     return stops
 
@@ -31,7 +30,7 @@ def get_stops(stops, grid_size, num_stops):
 def goal_test(cur_pos, next_stop):
     return cur_pos[0] == next_stop[0] and cur_pos[1] == next_stop[1]
 
-def actions(pos, grid_size=9, right=1, left=3):
+def actions(pos, x_grid=12, y_grid=54, right=1, left=3):
     # returns ((new x, new y, new direction), weight)
     straight = 1
     x, y = pos[0], pos[1]
@@ -44,38 +43,38 @@ def actions(pos, grid_size=9, right=1, left=3):
 
     # Handling actions for direction North (N)
     if direction == "N":
-        if y < grid_size - 1:  # Boundary check for moving North
+        if y < y_grid - 1:  # Boundary check for moving North
             possible_actions.append(((x, y + 1, "N"), straight))
-        if x < grid_size - 1:  # Boundary check for moving East
+        if x < x_grid - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), right))
         if x > 0:  # Boundary check for moving West
             possible_actions.append(((x - 1, y, "W"), left))
 
     # Handling actions for direction East (E)
     elif direction == "E":
-        if x < grid_size - 1:  # Boundary check for moving East
+        if x < x_grid - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), straight))
         if y > 0:  # Boundary check for moving South
             possible_actions.append(((x, y - 1, "S"), right))
-        if y < grid_size - 1:  # Boundary check for moving North
+        if y < y_grid - 1:  # Boundary check for moving North
             possible_actions.append(((x, y + 1, "N"), left))
 
     # Handling actions for direction West (W)
     elif direction == "W":
         if x > 0:  # Boundary check for moving West
             possible_actions.append(((x - 1, y, "W"), straight))
-        if y < grid_size - 1:  # Boundary check for moving North
+        if y < y_grid - 1:  # Boundary check for moving North
             possible_actions.append(((x, y + 1, "N"), right))
         if y > 0:  # Boundary check for moving South
             possible_actions.append(((x, y - 1, "S"), left))
 
     # Handling actions for direction South (S)
     elif direction == "S":
-        if y < grid_size - 1:  # Boundary check for moving South
+        if y < y_grid - 1:  # Boundary check for moving South
             possible_actions.append(((x, y - 1, "S"), straight))
         if x > 0:  # Boundary check for moving West
             possible_actions.append(((x - 1, y, "W"), right))
-        if x < grid_size - 1:  # Boundary check for moving East
+        if x < x_grid - 1:  # Boundary check for moving East
             possible_actions.append(((x + 1, y, "E"), left))
 
     return possible_actions
@@ -86,7 +85,7 @@ def add_to_priority_queue(q, priority, pos):
     q.sort()
     return q
 
-def A_star(start, end, grid_size, right, left, traffic):
+def A_star(start, end, x_grid, y_grid, right, left, traffic):
     q = []
     q = add_to_priority_queue(q, 0, start)  # Initialize the priority queue
     cost = {}
@@ -99,11 +98,11 @@ def A_star(start, end, grid_size, right, left, traffic):
         prev_direction = "N" #hard code a start facing north
     while len(q) > 0:
         cur_pos = q.pop(0)[1]  # Pop the item with the lowest priority
-        temp_traffic = incrementTraffic[traffic, grid_size, grid_size, steps[cur_pos]]
+        temp_traffic = incrementTraffic(traffic, x_grid, y_grid, steps[cur_pos])
         if goal_test(cur_pos, end):
             end = (end[0], end[1], cur_pos[2])
             break
-        for action in actions(cur_pos, grid_size, right, left):
+        for action in actions(cur_pos, x_grid, y_grid, right, left):
             next_pos, weight = action
             new_cost = cost[cur_pos] + weight
 
@@ -135,13 +134,13 @@ def A_star(start, end, grid_size, right, left, traffic):
 
 
 
-def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, straight = 1):
+def get_optimal_route(stops, x_grid = 12, y_grid =54, num_stops = 5, left = 3, right = 1, straight = 1):
     
     routes = get_stop_combinations(stops)
     path_taken_for_routes = []
     route_number = 0
     route_cost = []
-    traffic = create_secondary_agents(9, 9)
+    traffic = create_secondary_agents(x_grid, y_grid)
     for route in routes:
         path_cost = 0
         full_path = []
@@ -150,10 +149,10 @@ def get_optimal_route(stops, grid_size = 9, num_stops = 5, left = 3, right = 1, 
             #print("stop" + str(stop))
             next_stop = route[i + 1]
             #print("next stop: " + str(next_stop))
-            cost, path = A_star(stop, next_stop, grid_size, right, left, traffic)
+            cost, path = A_star(stop, next_stop, x_grid, y_grid, right, left, traffic)
             path_cost += cost
             full_path.extend(path[:-1])
-            traffic = incrementTraffic(traffic, grid_size, grid_size, len(path))
+            traffic = incrementTraffic(traffic, x_grid, y_grid, len(path))
         full_path.append(route[-1])
         path_taken_for_routes.append(full_path)
         route_cost.append(path_cost)
@@ -171,15 +170,16 @@ def get_costs():
     straight_weight = 7
     left_weight = 18
 
-    grid_size = 9
+    x_grid = 9
+    y_grid = 9
     num_stops = 5
 
     stops = []
-    stops = get_stops(stops, grid_size, num_stops)
+    stops = get_stops(stops, x_grid, y_grid, num_stops)
     #print("\nstops: " + str(stops) + "\n")
 
-    unweighted_route, cost_of_unweighted, path_taken_for_optimal_unweighted_route = get_optimal_route(stops, grid_size, num_stops, unweighted_cost, unweighted_cost, unweighted_cost)
-    weighted_route, cost_of_weighted, path_taken_for_optimal_weighted_route = get_optimal_route(stops, grid_size, num_stops, left_weight, right_weight, straight_weight)
+    unweighted_route, cost_of_unweighted, path_taken_for_optimal_unweighted_route = get_optimal_route(stops, x_grid, y_grid, num_stops, unweighted_cost, unweighted_cost, unweighted_cost)
+    weighted_route, cost_of_weighted, path_taken_for_optimal_weighted_route = get_optimal_route(stops, x_grid, y_grid, num_stops, left_weight, right_weight, straight_weight)
 
     # print("stops:", weighted_route)
     # print( "path taken to stops:", path_taken_for_optimal_weighted_route)
@@ -271,6 +271,7 @@ def check_at_edge(agent, grid_x, grid_y):
     
 
 def incrementTraffic(current_state, grid_x, grid_y, num_steps):
+
     for agent in current_state:
         for i in range(num_steps):
             if (agent[2] == "N") | (agent[2] == "S"):
@@ -307,27 +308,30 @@ def isTraffic(pos, traffic):
         # If bus is going same direction and is in front of us, take manhattan distance.
         if bus[2] == "N" and bus[1] >= pos[1]:
             # Negative manhattan distance for deincentivization
-            return bus[1] - pos[1]
+            return -(bus[1] - pos[1]) + y_grid
     elif pos[2] == "S":
         bus = traffic[pos[0]]
         if bus[2] == "S" and bus[1] <= pos[1]:
-            return pos[1] - bus[1]
+            return -(pos[1] - bus[1]) + y_grid
     elif pos[2] == "E":
-        bus = traffic[pos[1] + grid_size]
+        bus = traffic[pos[1] + x_grid]
         if bus[2] == "E" and bus[0] >= pos[0]:
-            return bus[0] - pos[0]
+            return -(bus[0] - pos[0]) + x_grid
     elif pos[2] == "W":
-        bus = traffic[pos[1]+grid_size]
+        bus = traffic[pos[1]+x_grid]
         if bus[2] == "W" and bus[0] <= pos[0]:
-            return pos[0] - bus[0]
+            return -(pos[0] - bus[0]) + x_grid
     return None
 
-grid_size = 9
+x_grid = 9
+y_grid=9
 def h(cur_pos, next_stop, traffic):
     #manhattan distance here
     traffic_cost = 0
     dx = abs(cur_pos[0] - next_stop[0])
     dy = abs(cur_pos[1] - next_stop[1])
     if isTraffic(cur_pos, traffic) != None:
-        traffic_cost = (-isTraffic(cur_pos, traffic)+grid_size)
+        traffic_cost = isTraffic(cur_pos, traffic)
     return dx + dy + traffic_cost
+
+weighted_path, route = loop_for_average(20)
