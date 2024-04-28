@@ -2,11 +2,14 @@ import matplotlib.pyplot as plt
 
 def visualize_route(path):
     fig, ax = plt.subplots(figsize=(12, 12))
-    grid_size = max(max(x[0], x[1]) for x in path) + 1  
+    x_grid = max(max(x[0], x[0]) for x in path) + 1  
+    y_grid = max(max(x[1], x[1]) for x in path) + 1  
+    print(x_grid)
+    print(y_grid)
     
     
-    ax.set_xticks(range(grid_size))
-    ax.set_yticks(range(grid_size))
+    ax.set_xticks(range(x_grid))
+    ax.set_yticks(range(y_grid))
     ax.grid(True)
     
    
@@ -56,8 +59,8 @@ def visualize_route(path):
             ax.text(pos[0], pos[1], f'Stop {numStop}', color='black', fontsize=10, ha='right', va='bottom', fontweight='bold')
             numStop += 1
 
-    ax.set_xlim([-1, grid_size])
-    ax.set_ylim([-1, grid_size])
+    ax.set_xlim([-1, x_grid])
+    ax.set_ylim([-1, y_grid])
     ax.set_aspect('equal')
     ax.set_title('Visualization of Path with Directions, Stops, and Turns')
     plt.xlabel('X Coordinate')
